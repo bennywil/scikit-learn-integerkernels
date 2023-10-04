@@ -2397,88 +2397,7 @@ class PairwiseKernel(Kernel):
 ### New integer kernels from here!! ###
 #######################################
 
-class Integer_Kernel(metaclass=ABCMeta):
-    """Base class for all kernels.
-
-    .. versionadded:: 0.18
-    """
-
-    def get_params(self, deep=True):
-        """Get parameters of this kernel.
-
-        Parameters
-        ----------
-        deep : bool, default=True
-            If True, will return the parameters for this estimator and
-            contained subobjects that are estimators.
-
-        Returns
-        -------
-        params : dict
-            Parameter names mapped to their values.
-        """
-        params = dict()
-
-        # introspect the constructor arguments to find the model parameters
-        # to represent
-        cls = self.__class__
-        init = getattr(cls.__init__, "deprecated_original", cls.__init__)
-        init_sign = signature(init)
-        args, varargs = [], []
-        for parameter in init_sign.parameters.values():
-            if parameter.kind != parameter.VAR_KEYWORD and parameter.name != "self":
-                args.append(parameter.name)
-            if parameter.kind == parameter.VAR_POSITIONAL:
-                varargs.append(parameter.name)
-
-        if len(varargs) != 0:
-            raise RuntimeError(
-                "scikit-learn kernels should always "
-                "specify their parameters in the signature"
-                " of their __init__ (no varargs)."
-                " %s doesn't follow this convention." % (cls,)
-            )
-        for arg in args:
-            params[arg] = getattr(self, arg)
-
-        return params
-
-class StationaryKernelMixin:
-    """Mixin for kernels which are stationary: k(X, Y)= f(X-Y).
-
-    .. versionadded:: 0.18
-    """
-
-    def is_stationary(self):
-        """Returns whether the kernel is stationary."""
-        return True
-
-class NormalizedKernelMixin:
-    """Mixin for kernels which are normalized: k(X, X)=1.
-
-    .. versionadded:: 0.18
-    """
-
-    def diag(self, X):
-        """Returns the diagonal of the kernel k(X, X).
-
-        The result of this method is identical to np.diag(self(X)); however,
-        it can be evaluated more efficiently since only the diagonal is
-        evaluated.
-
-        Parameters
-        ----------
-        X : ndarray of shape (n_samples_X, n_features)
-            Left argument of the returned kernel k(X, Y)
-
-        Returns
-        -------
-        K_diag : ndarray of shape (n_samples_X,)
-            Diagonal of kernel k(X, X)
-        """
-        return np.ones(X.shape[0])
-
-class RBF(StationaryKernelMixin, NormalizedKernelMixin, Kernel):
+class Integer_RBF(StationaryKernelMixin, NormalizedKernelMixin, Kernel):
     """Radial basis function kernel (aka squared-exponential kernel).
 
     The RBF kernel is a stationary kernel. It is also known as the
@@ -2635,7 +2554,7 @@ class RBF(StationaryKernelMixin, NormalizedKernelMixin, Kernel):
             )
 
 
-class Matern(RBF):
+class Integer_Matern(RBF):
     """Matern kernel.
 
     The class of Matern kernels is a generalization of the :class:`RBF`.
